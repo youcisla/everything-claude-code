@@ -33,8 +33,8 @@ Follow these commit message conventions based on 500 analyzed commits.
 
 ### Prefixes Used
 
-- `fix`
 - `feat`
+- `fix`
 - `docs`
 - `test`
 
@@ -48,7 +48,7 @@ Follow these commit message conventions based on 500 analyzed commits.
 *Commit message example*
 
 ```text
-feat: add everything-claude-code ECC bundle (.claude/commands/add-or-update-skill-documentation.md)
+feat: add everything-claude-code ECC bundle (.claude/commands/add-or-update-skill.md)
 ```
 
 *Commit message example*
@@ -209,7 +209,7 @@ fix(install): add rust, cpp, csharp to legacy language alias map (#747)
 
 Standard feature implementation workflow
 
-**Frequency**: ~21 times per month
+**Frequency**: ~26 times per month
 
 **Steps**:
 1. Add feature implementation
@@ -223,126 +223,100 @@ Standard feature implementation workflow
 
 **Example commit sequence**:
 ```
-docs(pt-BR): add rules translation
-docs(pt-BR): add examples translation
-docs(pt-BR): add commands translation
-```
-
-### Add Or Update Skill
-
-Adds a new skill or updates documentation for an existing skill.
-
-**Frequency**: ~2 times per month
-
-**Steps**:
-1. Create or update SKILL.md in the relevant skills directory.
-2. Optionally add architecture diagrams, implementation notes, or integration guidance.
-
-**Files typically involved**:
-- `skills/*/SKILL.md`
-- `docs/zh-CN/skills/*/SKILL.md`
-- `docs/tr/skills/*/SKILL.md`
-
-**Example commit sequence**:
-```
-Create or update SKILL.md in the relevant skills directory.
-Optionally add architecture diagrams, implementation notes, or integration guidance.
-```
-
-### Add Or Update Localization
-
-Adds or updates documentation translations for a new or existing language.
-
-**Frequency**: ~2 times per month
-
-**Steps**:
-1. Add or update docs in docs/<lang>/ for agents, commands, skills, rules, and examples.
-2. Update README.md to reference the new or updated language.
-3. Optionally increment language count in README.
-
-**Files typically involved**:
-- `docs/zh-CN/**/*`
-- `docs/pt-BR/**/*`
-- `docs/tr/**/*`
-- `README.md`
-
-**Example commit sequence**:
-```
-Add or update docs in docs/<lang>/ for agents, commands, skills, rules, and examples.
-Update README.md to reference the new or updated language.
-Optionally increment language count in README.
+Merge pull request #736 from pvgomes/docs/add-brazilian-portuguese-translation
+fix: bump plugin.json and marketplace.json to v1.9.0
+Add Turkish (tr) docs and update README (#744)
 ```
 
 ### Add Or Update Command Doc
 
-Adds or updates documentation for a CLI command.
+Adds or updates documentation for a command, typically in Markdown under a language or locale-specific docs directory.
 
-**Frequency**: ~2 times per month
+**Frequency**: ~3 times per month
 
 **Steps**:
-1. Create or update a markdown file in commands/ or docs/<lang>/commands/.
-2. Optionally update README.md or AGENTS.md to reflect the new/updated command.
+1. Create or update a Markdown file for the command in the appropriate docs directory (e.g., docs/zh-CN/commands/ or docs/tr/commands/).
+2. Commit the new or changed file with a message referencing the command.
+3. Optionally update README or language count if adding a new language.
 
 **Files typically involved**:
-- `commands/*.md`
 - `docs/zh-CN/commands/*.md`
-- `docs/pt-BR/commands/*.md`
 - `docs/tr/commands/*.md`
-- `README.md`
-- `AGENTS.md`
+- `docs/pt-BR/commands/*.md`
 
 **Example commit sequence**:
 ```
-Create or update a markdown file in commands/ or docs/<lang>/commands/.
-Optionally update README.md or AGENTS.md to reflect the new/updated command.
+Create or update a Markdown file for the command in the appropriate docs directory (e.g., docs/zh-CN/commands/ or docs/tr/commands/).
+Commit the new or changed file with a message referencing the command.
+Optionally update README or language count if adding a new language.
 ```
 
-### Feature Development With Tests And Docs
+### Add Or Update Skill Doc
 
-Implements a new feature, adds or updates tests, and documents the change.
+Adds or updates documentation for a skill, typically in SKILL.md under a language or locale-specific docs directory.
+
+**Frequency**: ~3 times per month
+
+**Steps**:
+1. Create or update a SKILL.md file for the skill in the appropriate docs directory (e.g., docs/zh-CN/skills/, docs/tr/skills/, docs/pt-BR/skills/).
+2. Commit the new or changed file with a message referencing the skill.
+
+**Files typically involved**:
+- `docs/zh-CN/skills/*/SKILL.md`
+- `docs/tr/skills/*/SKILL.md`
+- `docs/pt-BR/skills/*/SKILL.md`
+
+**Example commit sequence**:
+```
+Create or update a SKILL.md file for the skill in the appropriate docs directory (e.g., docs/zh-CN/skills/, docs/tr/skills/, docs/pt-BR/skills/).
+Commit the new or changed file with a message referencing the skill.
+```
+
+### Add Or Update Locale Docs
+
+Adds or updates a full set of localized documentation for a new or existing language, including agents, commands, skills, and guides.
 
 **Frequency**: ~2 times per month
 
 **Steps**:
-1. Implement or modify feature code (e.g., in src/, scripts/, or main code directories).
-2. Update or add relevant tests in tests/.
-3. Update or add documentation in docs/ or README.md.
+1. Create or update multiple Markdown files under a new or existing language directory (e.g., docs/tr/, docs/pt-BR/, docs/zh-CN/).
+2. Update README.md to increment supported language count and add references.
+3. Commit all new or changed files.
 
 **Files typically involved**:
-- `src/**/*`
-- `scripts/**/*`
-- `tests/**/*`
-- `docs/**/*`
+- `docs/tr/**/*`
+- `docs/pt-BR/**/*`
+- `docs/zh-CN/**/*`
 - `README.md`
 
 **Example commit sequence**:
 ```
-Implement or modify feature code (e.g., in src/, scripts/, or main code directories).
-Update or add relevant tests in tests/.
-Update or add documentation in docs/ or README.md.
+Create or update multiple Markdown files under a new or existing language directory (e.g., docs/tr/, docs/pt-BR/, docs/zh-CN/).
+Update README.md to increment supported language count and add references.
+Commit all new or changed files.
 ```
 
-### Add Or Update Hook
+### Add Or Update Ecc Bundle Command
 
-Adds or modifies a project hook for linting, formatting, or config protection.
+Adds or updates ECC bundle command documentation or configuration, typically in .claude/commands/ or related ECC config directories.
 
 **Frequency**: ~2 times per month
 
 **Steps**:
-1. Edit or add hook configuration in hooks/hooks.json.
-2. Implement or update hook logic in scripts/hooks/.
-3. Optionally update related plugin files.
+1. Create or update a Markdown file in .claude/commands/ for the new or updated command.
+2. Optionally update related config files (e.g., .claude/ecc-tools.json, .claude/identity.json).
+3. Commit the changes.
 
 **Files typically involved**:
-- `hooks/hooks.json`
-- `scripts/hooks/*.js`
-- `.opencode/plugins/*.ts`
+- `.claude/commands/*.md`
+- `.claude/ecc-tools.json`
+- `.claude/identity.json`
 
 **Example commit sequence**:
 ```
-Edit or add hook configuration in hooks/hooks.json.
-Implement or update hook logic in scripts/hooks/.
-Optionally update related plugin files.
+Create or update a Markdown file in .claude/commands/ for the new or updated command.
+Optionally update related config files (e.g., .claude/ecc-tools.json, .claude/identity.json).
+Commit the changes.
 ```
 
 
