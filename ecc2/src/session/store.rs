@@ -3,6 +3,7 @@ use rusqlite::Connection;
 use std::path::Path;
 
 use super::{Session, SessionMetrics, SessionState};
+use crate::observability::{ToolLogEntry, ToolLogPage};
 
 pub struct StateStore {
     conn: Connection,
@@ -112,6 +113,14 @@ impl StateStore {
         Ok(())
     }
 
+    pub fn increment_tool_calls(&self, session_id: &str) -> Result<()> {
+        self.conn.execute(
+            "UPDATE sessions SET tool_calls = tool_calls + 1, updated_at = ?1 WHERE id = ?2",
+            rusqlite::params![chrono::Utc::now().to_rfc3339(), session_id],
+        )?;
+        Ok(())
+    }
+
     pub fn list_sessions(&self) -> Result<Vec<Session>> {
         let mut stmt = self.conn.prepare(
             "SELECT id, task, agent_type, state, worktree_path, worktree_branch, worktree_base,
@@ -170,21 +179,99 @@ impl StateStore {
 
     pub fn get_session(&self, id: &str) -> Result<Option<Session>> {
         let sessions = self.list_sessions()?;
-        Ok(sessions.into_iter().find(|s| s.id == id || s.id.starts_with(id)))
+        Ok(sessions
+            .into_iter()
+            .find(|s| s.id == id || s.id.starts_with(id)))
     }
 
-    pub fn send_message(
-        &self,
-        from: &str,
-        to: &str,
-        content: &str,
-        msg_type: &str,
-    ) -> Result<()> {
+    pub fn send_message(&self, from: &str, to: &str, content: &str, msg_type: &str) -> Result<()> {
         self.conn.execute(
             "INSERT INTO messages (from_session, to_session, content, msg_type, timestamp)
              VALUES (?1, ?2, ?3, ?4, ?5)",
             rusqlite::params![from, to, content, msg_type, chrono::Utc::now().to_rfc3339()],
         )?;
         Ok(())
+    }
+
+    pub fn insert_tool_log(
+        &self,
+        session_id: &str,
+        tool_name: &str,
+        input_summary: &str,
+        output_summary: &str,
+        duration_ms: u64,
+        risk_score: f64,
+        timestamp: &str,
+    ) -> Result<ToolLogEntry> {
+        self.conn.execute(
+            "INSERT INTO tool_log (session_id, tool_name, input_summary, output_summary, duration_ms, risk_score, timestamp)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+            rusqlite::params![
+                session_id,
+                tool_name,
+                input_summary,
+                output_summary,
+                duration_ms,
+                risk_score,
+                timestamp,
+            ],
+        )?;
+
+        Ok(ToolLogEntry {
+            id: self.conn.last_insert_rowid(),
+            session_id: session_id.to_string(),
+            tool_name: tool_name.to_string(),
+            input_summary: input_summary.to_string(),
+            output_summary: output_summary.to_string(),
+            duration_ms,
+            risk_score,
+            timestamp: timestamp.to_string(),
+        })
+    }
+
+    pub fn query_tool_logs(
+        &self,
+        session_id: &str,
+        page: u64,
+        page_size: u64,
+    ) -> Result<ToolLogPage> {
+        let page = page.max(1);
+        let offset = (page - 1) * page_size;
+
+        let total: u64 = self.conn.query_row(
+            "SELECT COUNT(*) FROM tool_log WHERE session_id = ?1",
+            rusqlite::params![session_id],
+            |row| row.get(0),
+        )?;
+
+        let mut stmt = self.conn.prepare(
+            "SELECT id, session_id, tool_name, input_summary, output_summary, duration_ms, risk_score, timestamp
+             FROM tool_log
+             WHERE session_id = ?1
+             ORDER BY timestamp DESC, id DESC
+             LIMIT ?2 OFFSET ?3",
+        )?;
+
+        let entries = stmt
+            .query_map(rusqlite::params![session_id, page_size, offset], |row| {
+                Ok(ToolLogEntry {
+                    id: row.get(0)?,
+                    session_id: row.get(1)?,
+                    tool_name: row.get(2)?,
+                    input_summary: row.get::<_, Option<String>>(3)?.unwrap_or_default(),
+                    output_summary: row.get::<_, Option<String>>(4)?.unwrap_or_default(),
+                    duration_ms: row.get::<_, Option<u64>>(5)?.unwrap_or_default(),
+                    risk_score: row.get::<_, Option<f64>>(6)?.unwrap_or_default(),
+                    timestamp: row.get(7)?,
+                })
+            })?
+            .collect::<Result<Vec<_>, _>>()?;
+
+        Ok(ToolLogPage {
+            entries,
+            page,
+            page_size,
+            total,
+        })
     }
 }
