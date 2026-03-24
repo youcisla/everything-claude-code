@@ -10,12 +10,16 @@ Use this workflow when working on **add-or-update-skill** in `everything-claude-
 
 ## Goal
 
-Adds a new skill or updates an existing skill's documentation and implementation.
+Adds or updates a skill in the ECC system, including documentation and provenance.
 
 ## Common Files
 
 - `skills/*/SKILL.md`
 - `.claude/skills/*/SKILL.md`
+- `.agents/skills/*/SKILL.md`
+- `.agents/skills/*/agents/*.yaml`
+- `schemas/provenance.schema.json`
+- `docs/SKILL-PLACEMENT-POLICY.md`
 
 ## Suggested Sequence
 
@@ -26,8 +30,9 @@ Adds a new skill or updates an existing skill's documentation and implementation
 
 ## Typical Commit Signals
 
-- Create or update skills/<skill-name>/SKILL.md or similar documentation file.
-- Optionally, add or update related scripts, diagrams, or integration notes.
+- Create or update SKILL.md in the appropriate skills directory (e.g., skills/{skill-name}/SKILL.md or .claude/skills/{skill-name}/SKILL.md)
+- Optionally add or update agent YAML files (e.g., .agents/skills/{skill-name}/agents/*.yaml)
+- Optionally update provenance or placement policy files (e.g., schemas/provenance.schema.json, docs/SKILL-PLACEMENT-POLICY.md)
 
 ## Notes
 
